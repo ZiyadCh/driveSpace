@@ -1,3 +1,12 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
-    name: driveSpace
+    name: driverSpace
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/driverSpace
+    username: kaiser
+    password: ${DB_PASSWORD:changeme}
+server:
+  port: 8081
