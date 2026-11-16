@@ -42,7 +42,7 @@ public class Conductor {
   @Column(name = "numero_permis", nullable = false, unique = true, length = 50)
   private String numeroPermis;
 
-  @OneToMany(mappedBy = "conducteur", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "conductor", fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Vehicle> vehicles = new ArrayList<>();
 
 }
