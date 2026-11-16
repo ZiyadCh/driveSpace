@@ -5,7 +5,7 @@ spring:
     name: driverSpace
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/driverSpace
+    url: jdbc:postgresql://postgres:5432/driverSpace
     username: kaiser
     password: ${DB_PASSWORD:changeme}
 server:
