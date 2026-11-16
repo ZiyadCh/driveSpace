@@ -1,12 +1,12 @@
 package ma.youcode.driveSpace.entities;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "conductors")
+@Table(name = "conducteurs")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,29 +27,22 @@ public class Conductor {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String firstName;
+  @Column(nullable = false, length = 100)
+  private String nom;
 
-  @Column(nullable = false)
-  private String lastName;
+  @Column(nullable = false, length = 100)
+  private String prenom;
 
-  @Column(nullable = false, unique = true)
-  private String licenseNumber;
+  @Column(nullable = false, unique = true, length = 150)
+  private String email;
 
-  private LocalDate licenseExpiry;
+  @Column(nullable = false, length = 20)
+  private String telephone;
 
-  private String phone;
+  @Column(name = "numero_permis", nullable = false, unique = true, length = 50)
+  private String numeroPermis;
 
-  @OneToMany(mappedBy = "conductor", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "conducteur", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
   private List<Vehicle> vehicles = new ArrayList<>();
 
-  public void addVehicle(Vehicle vehicle) {
-    vehicles.add(vehicle);
-    vehicle.setConductor(this);
-  }
-
-  public void removeVehicle(Vehicle vehicle) {
-    vehicles.remove(vehicle);
-    vehicle.setConductor(null);
-  }
 }

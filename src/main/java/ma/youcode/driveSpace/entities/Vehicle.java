@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,18 +26,24 @@ public class Vehicle {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true)
+  @Column(name = "plate_number", nullable = false, unique = true, length = 20)
   private String plateNumber;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private String brand;
 
+  @Column(nullable = false, length = 50)
   private String model;
 
-  @Column(name = "manufacture_year")
-  private Integer year;
+  @Column(length = 30)
+  private String color;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "conductor_id")
+  @Min(1)
+  @Max(8)
+  @Column(nullable = false)
+  private int capacity;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "conductor_id", nullable = false)
   private Conductor conductor;
 }
