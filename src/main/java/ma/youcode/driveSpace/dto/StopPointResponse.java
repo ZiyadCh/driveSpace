@@ -11,22 +11,13 @@ import jakarta.validation.constraints.Size;
 
 public record StopPointResponse(
 
-    @NotNull(message = "Id is required")
-    @Positive(message = "Id must be positive")
-    Long id,
+    @NotNull(message = "Id is required") @Positive(message = "Id must be positive") Long id,
 
-    @NotBlank(message = "City is required")
-    @Size(max = 100, message = "City must not exceed 100 characters")
-    String city,
+    @NotBlank(message = "City is required") @Size(max = 100, message = "City must not exceed 100 characters") String city,
 
-    @Positive(message = "Stop order must be positive")
-    int stopOrder,
+    @Positive(message = "Stop order must be positive") int stopOrder,
 
-    @NotNull(message = "Passage time is required")
-    LocalTime passageTime,
+    @NotNull(message = "Passage time is required") LocalTime passageTime,
 
-    @NotNull(message = "Price from departure is required")
-    @DecimalMin(value = "0.00", message = "Price from departure must not be negative")
-    BigDecimal priceFromDeparture
-) {
+    @NotNull(message = "Price from departure is required") @DecimalMin(value = "0.00", message = "Price from departure must not be negative") BigDecimal priceFromDeparture) {
 }

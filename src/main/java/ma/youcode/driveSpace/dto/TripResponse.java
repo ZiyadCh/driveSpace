@@ -13,37 +13,21 @@ import ma.youcode.driveSpace.enums.TripStatus;
 
 public record TripResponse(
 
-    @NotNull(message = "Id is required")
-    @Positive(message = "Id must be positive")
-    Long id,
+    @NotNull(message = "Id is required") @Positive(message = "Id must be positive") Long id,
 
-    @NotNull(message = "Conductor id is required")
-    @Positive(message = "Conductor id must be positive")
-    Long conductorId,
+    @NotNull(message = "Conductor id is required") @Positive(message = "Conductor id must be positive") Long conductorId,
 
-    @NotNull(message = "Vehicle id is required")
-    @Positive(message = "Vehicle id must be positive")
-    Long vehicleId,
+    @NotNull(message = "Vehicle id is required") @Positive(message = "Vehicle id must be positive") Long vehicleId,
 
-    @NotBlank(message = "Departure city is required")
-    @Size(max = 100, message = "Departure city must not exceed 100 characters")
-    String departureCity,
+    @NotBlank(message = "Departure city is required") @Size(max = 100, message = "Departure city must not exceed 100 characters") String departureCity,
 
-    @NotBlank(message = "Arrival city is required")
-    @Size(max = 100, message = "Arrival city must not exceed 100 characters")
-    String arrivalCity,
+    @NotBlank(message = "Arrival city is required") @Size(max = 100, message = "Arrival city must not exceed 100 characters") String arrivalCity,
 
-    @NotNull(message = "Departure time is required")
-    LocalDateTime departureTime,
+    @NotNull(message = "Departure time is required") LocalDateTime departureTime,
 
-    @Min(value = 1, message = "Offered seats must be at least 1")
-    int offeredSeats,
+    @Min(value = 1, message = "Offered seats must be at least 1") int offeredSeats,
 
-    @NotNull(message = "Status is required")
-    TripStatus status,
+    @NotNull(message = "Status is required") TripStatus status,
 
-    @Valid
-    @NotNull(message = "Stop points are required")
-    List<StopPointResponse> stopPoints
-) {
+    @Valid @NotNull(message = "Stop points are required") List<StopPointResponse> stopPoints) {
 }
