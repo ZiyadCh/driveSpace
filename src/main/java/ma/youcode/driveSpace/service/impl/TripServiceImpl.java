@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import ma.youcode.driveSpace.dto.TripRequest;
 import ma.youcode.driveSpace.dto.TripResponse;
 import ma.youcode.driveSpace.entities.Trip;
 import ma.youcode.driveSpace.exception.ResourceNotFoundException;
@@ -35,4 +36,11 @@ public class TripServiceImpl implements TripService {
     return tripRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Trip " + id + " not found"));
   }
+
+  @Override
+  public TripResponse create(TripRequest tripRequest) {
+    Trip trip = mapper.toEntity(tripRequest);
+    return mapper.toResponse(tripRepository.save(trip));
+  }
+
 }

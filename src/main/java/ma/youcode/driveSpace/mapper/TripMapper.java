@@ -6,12 +6,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import ma.youcode.driveSpace.dto.StopPointResponse;
+import ma.youcode.driveSpace.dto.TripRequest;
 import ma.youcode.driveSpace.dto.TripResponse;
 import ma.youcode.driveSpace.entities.StopPoint;
 import ma.youcode.driveSpace.entities.Trip;
 
 @Mapper(componentModel = "spring")
 public interface TripMapper {
+
+  @Mapping(target = "id", ignore = true)
+  Trip toEntity(TripRequest request);
 
   @Mapping(source = "conductor.id", target = "conductorId")
   @Mapping(source = "vehicle.id", target = "vehicleId")
