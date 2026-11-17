@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record VehicleRequest(
@@ -28,6 +29,7 @@ public record VehicleRequest(
     int capacity,
 
     @NotNull(message = "Conductor id is required")
+    @Positive(message = "Conductor id must be positive")
     Long conductorId
 ) {
 }
