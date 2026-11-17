@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "conducteurs")
+@Table(name = "conductors")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,20 +27,20 @@ public class Conductor {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 100)
-  private String nom;
+  @Column(name = "first_name", nullable = false, length = 100)
+  private String firstName;
 
-  @Column(nullable = false, length = 100)
-  private String prenom;
+  @Column(name = "last_name", nullable = false, length = 100)
+  private String lastName;
 
   @Column(nullable = false, unique = true, length = 150)
   private String email;
 
   @Column(nullable = false, length = 20)
-  private String telephone;
+  private String phone;
 
-  @Column(name = "numero_permis", nullable = false, unique = true, length = 50)
-  private String numeroPermis;
+  @Column(name = "license_number", nullable = false, unique = true, length = 50)
+  private String licenseNumber;
 
   @OneToMany(mappedBy = "conductor", fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Vehicle> vehicles = new ArrayList<>();
