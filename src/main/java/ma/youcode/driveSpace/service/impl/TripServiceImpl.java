@@ -1,17 +1,31 @@
 package ma.youcode.driveSpace.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import ma.youcode.driveSpace.dto.StopPointResponse;
 import ma.youcode.driveSpace.dto.TripRequest;
 import ma.youcode.driveSpace.dto.TripResponse;
+import ma.youcode.driveSpace.entities.Conductor;
+import ma.youcode.driveSpace.entities.StopPoint;
 import ma.youcode.driveSpace.entities.Trip;
+import ma.youcode.driveSpace.entities.Vehicle;
+import ma.youcode.driveSpace.exception.BusinessRuleException;
 import ma.youcode.driveSpace.exception.ResourceNotFoundException;
 import ma.youcode.driveSpace.mapper.TripMapper;
+import ma.youcode.driveSpace.repository.ConductorRepository;
+import ma.youcode.driveSpace.repository.ReservationRepository;
 import ma.youcode.driveSpace.repository.TripRepository;
+import ma.youcode.driveSpace.repository.VehicleRepository;
 import ma.youcode.driveSpace.service.TripService;
 
 @Service
@@ -20,6 +34,9 @@ import ma.youcode.driveSpace.service.TripService;
 public class TripServiceImpl implements TripService {
 
   private final TripRepository tripRepository;
+  private final ConductorRepository conductorRepository;
+  private final VehicleRepository vehicleRepository;
+  private final ReservationRepository reservationRepository;
   private final TripMapper mapper;
 
   @Override
@@ -32,15 +49,73 @@ public class TripServiceImpl implements TripService {
     return mapper.toResponse(findTrip(id));
   }
 
-  private Trip findTrip(Long id) {
-    return tripRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Trip " + id + " not found"));
-  }
-
   @Override
+  @Transactional
   public TripResponse create(TripRequest tripRequest) {
     Trip trip = mapper.toEntity(tripRequest);
     return mapper.toResponse(tripRepository.save(trip));
   }
 
+  @Override
+  @Transactional
+  public TripResponse update(Long id, TripRequest tripRequest) {
+    Trip trip = findTrip(id);
+
+    mapper.update(tripRequest, trip);
+    trip.setConductor(findConductor(tripRequest.conductorId()));
+    trip.setVehicle(findVehicle(tripRequest.vehicleId()));
+    syncStopPoints(trip, tripRequest.stopPoints());
+
+    return mapper.toResponse(tripRepository.save(trip));
+  }
+
+  @Override
+  @Transactional
+  public void delete(Long id) {
+    Trip trip = findTrip(id);
+    if (reservationRepository.existsByTripId(id)) {
+      throw new BusinessRuleException("Cannot delete trip " + id + ": it has reservations");
+    }
+    tripRepository.delete(trip);
+  }
+
+  private Trip findTrip(Long id) {
+    return tripRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Trip " + id + " not found"));
+  }
+
+  private Conductor findConductor(Long id) {
+    return conductorRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Conductor " + id + " not found"));
+  }
+
+  private Vehicle findVehicle(Long id) {
+    return vehicleRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Vehicle " + id + " not found"));
+  }
+
+  private void syncStopPoints(Trip trip, List<StopPointResponse> requested) {
+    Map<Long, StopPoint> existing = trip.getStopPoints().stream()
+        .collect(Collectors.toMap(StopPoint::getId, Function.identity()));
+
+    Set<Integer> orders = new HashSet<>();
+    List<StopPoint> synced = new ArrayList<>();
+    for (StopPointResponse item : requested) {
+      if (!orders.add(item.stopOrder())) {
+        throw new BusinessRuleException("Stop order " + item.stopOrder() + " is duplicated");
+      }
+      StopPoint stopPoint = existing.get(item.id());
+      if (stopPoint == null) {
+        throw new BusinessRuleException("Stop point " + item.id() + " does not belong to trip " + trip.getId());
+      }
+      stopPoint.setCity(item.city());
+      stopPoint.setStopOrder(item.stopOrder());
+      stopPoint.setPassageTime(item.passageTime());
+      stopPoint.setPriceFromDeparture(item.priceFromDeparture());
+      synced.add(stopPoint);
+    }
+
+    trip.getStopPoints().clear();
+    trip.getStopPoints().addAll(synced);
+  }
 }

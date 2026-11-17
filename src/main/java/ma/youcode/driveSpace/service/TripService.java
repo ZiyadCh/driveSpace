@@ -13,4 +13,7 @@ public interface TripService {
 
   TripResponse create(TripRequest tripRequest);
 
+  TripResponse update(Long id, TripRequest tripRequest);
+
+  void delete(Long id);
 }

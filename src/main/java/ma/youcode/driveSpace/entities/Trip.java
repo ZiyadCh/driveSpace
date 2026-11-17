@@ -58,6 +58,7 @@ public class Trip {
   private int offeredSeats;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(nullable = false)
   private TripStatus status = TripStatus.PUBLIE;
 

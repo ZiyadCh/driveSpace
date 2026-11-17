@@ -2,8 +2,11 @@ package ma.youcode.driveSpace.mapper;
 
 import java.util.List;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import ma.youcode.driveSpace.dto.StopPointResponse;
 import ma.youcode.driveSpace.dto.TripRequest;
@@ -24,4 +27,11 @@ public interface TripMapper {
   List<TripResponse> toResponseList(List<Trip> trips);
 
   StopPointResponse toStopPointResponse(StopPoint stopPoint);
+
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "conductor", ignore = true)
+  @Mapping(target = "vehicle", ignore = true)
+  @Mapping(target = "stopPoints", ignore = true)
+  void update(TripRequest request, @MappingTarget Trip trip);
 }
