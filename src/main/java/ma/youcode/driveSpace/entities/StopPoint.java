@@ -18,9 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "stop_points",
-    uniqueConstraints = @UniqueConstraint(name = "uc_trajet_ordre", columnNames = { "trip_id", "stop_order" }))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,6 +40,6 @@ public class StopPoint {
   @Column(name = "passage_time", nullable = false)
   private LocalTime passageTime;
 
-  @Column(name = "price_from_departure", nullable = false, precision = 10, scale = 2)
+  @Column(name = "price_from_departure", nullable = false)
   private BigDecimal priceFromDeparture = BigDecimal.ZERO;
 }

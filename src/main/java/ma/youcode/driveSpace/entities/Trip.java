@@ -58,16 +58,10 @@ public class Trip {
   private int offeredSeats;
 
   @Enumerated(EnumType.STRING)
-  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(nullable = false)
   private TripStatus status = TripStatus.PUBLIE;
 
-  @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  @OrderBy("stopOrder ASC")
+  @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<StopPoint> stopPoints = new ArrayList<>();
 
-  public void addStopPoint(StopPoint stopPoint) {
-    stopPoints.add(stopPoint);
-    stopPoint.setTrip(this);
-  }
 }
