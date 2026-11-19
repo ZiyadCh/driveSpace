@@ -1,8 +1,12 @@
 package ma.youcode.driveSpace.controller;
 
+import java.awt.print.Pageable;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.query.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +21,7 @@ import ma.youcode.driveSpace.dto.TripResponse;
 import ma.youcode.driveSpace.service.TripService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/trip")
@@ -33,6 +38,15 @@ public class TripController {
   @GetMapping("/{id}")
   public TripResponse findById(@PathVariable Long id) {
     return tripService.findById(id);
+  }
+
+  @GetMapping("/search")
+  public String searchTrips(@RequestParam String ville_depart, @RequestParam String ville_arrive,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      @RequestParam LocalDateTime date) {
+      Pageable pageable PageRequest.of(page, size);
+    return new String();
   }
 
   @PostMapping()
