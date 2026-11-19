@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,11 +39,6 @@ public class TripController {
   public ResponseEntity<TripResponse> createTrip(@Valid @RequestBody TripRequest tripRequest) {
     TripResponse created = tripService.create(tripRequest);
     return ResponseEntity.created(URI.create("api/trip" + created.id())).body(created);
-  }
-
-  @PutMapping("/{id}")
-  public TripResponse update(@PathVariable Long id, @Valid @RequestBody TripRequest tripRequest) {
-    return tripService.update(id, tripRequest);
   }
 
   @DeleteMapping("/{id}")

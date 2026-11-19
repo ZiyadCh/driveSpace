@@ -11,9 +11,6 @@ import jakarta.validation.constraints.Size;
 
 public record StopPointRequest(
 
-    @Positive(message = "Id must be positive")
-    Long id,
-
     @NotBlank(message = "City is required")
     @Size(max = 100, message = "City must not exceed 100 characters")
     String city,

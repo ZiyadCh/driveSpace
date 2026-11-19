@@ -28,7 +28,7 @@ public record TripRequest(
 
     @NotNull(message = "Status is required") TripStatus status,
 
-    @Valid @NotNull(message = "Stop points are required") List<StopPointResponse> stopPoints
+    @Valid @NotNull(message = "Stop points are required") List<StopPointRequest> stopPoints
 
 ) {
 }
