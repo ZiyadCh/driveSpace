@@ -41,10 +41,11 @@ public class TripController {
   }
 
   @GetMapping("/search")
-  public Page<TripResponse> searchTrips(@RequestParam String ville_depart, @RequestParam String ville_arrive,
+  public Page<TripResponse> searchTrips(@RequestParam(required = false) String ville_depart,
+      @RequestParam(required = false) String ville_arrive,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
-      @RequestParam LocalDateTime date) {
+      @RequestParam(required = false) LocalDateTime date) {
     return tripService.search(ville_depart, ville_arrive, date, PageRequest.of(page, size));
   }
 
