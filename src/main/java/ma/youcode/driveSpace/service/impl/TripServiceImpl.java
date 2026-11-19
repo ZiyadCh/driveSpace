@@ -1,9 +1,12 @@
 package ma.youcode.driveSpace.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +68,22 @@ public class TripServiceImpl implements TripService {
     }
 
     return mapper.toResponse(saved);
+  }
+
+  @Override
+  public Page<TripResponse> search(String villeDepart, String villeArrive, LocalDateTime date, Pageable pageable) {
+    LocalDateTime from = null;
+    LocalDateTime to = null;
+    if (date != null) {
+      from = date.toLocalDate().atStartOfDay();
+      to = from.plusDays(1);
+    }
+
+    return tripRepository.search(
+        villeDepart == null || villeDepart.isBlank() ? null : villeDepart,
+        villeArrive == null || villeArrive.isBlank() ? null : villeArrive,
+        from, to, pageable)
+        .map(mapper::toResponse);
   }
 
   @Override
