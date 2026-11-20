@@ -20,4 +20,6 @@ public interface TripService {
   TripResponse create(TripRequest tripRequest);
 
   void delete(Long id);
+
+  void cancel(Long tripId, Long conductorId);
 }
