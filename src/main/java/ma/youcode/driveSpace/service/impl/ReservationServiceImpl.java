@@ -92,12 +92,11 @@ public class ReservationServiceImpl implements ReservationService {
 
   @Override
   @Transactional
-  public void cancel(Long reservationId, Long passengerId, Long tripId) {
+  public void cancel(Long reservationId, Long passengerId) {
     Reservation reservation = reservationRepository.findById(reservationId)
         .orElseThrow(() -> new ResourceNotFoundException("Reservation " + reservationId + " not found"));
 
-    Trip trip = tripRepository.findById(tripId)
-        .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
+    Trip trip = reservation.getTrip();
 
     if (LocalDateTime.now().isAfter(trip.getDepartureTime().minusHours(24))) {
       throw new BusinessRuleException("You can't cancel before 24 hours before the trip");
