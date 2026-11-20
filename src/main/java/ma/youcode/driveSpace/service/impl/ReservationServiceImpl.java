@@ -88,6 +88,26 @@ public class ReservationServiceImpl implements ReservationService {
     return mapper.toResponseList(reservationRepository.findByTripIdOrderByReservedAtDesc(tripId));
   }
 
+  @Override
+  @Transactional
+  public void cancel(Long reservationId, Long passengerId) {
+    Reservation reservation = findReservation(reservationId);
+
+    if (!reservation.getPassenger().getId().equals(passengerId)) {
+      throw new ForbiddenActionException("You can only cancel your own reservations.");
+    }
+
+    if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
+      throw new BusinessRuleException("This reservation is already cancelled.");
+    }
+
+    reservation.setStatus(ReservationStatus.ANNULEE);
+    reservationRepository.save(reservation);
+
+    updateTripStatusAfterCancellation(reservation.getTrip());
+  }
+
+  ///////////////////////////////
   private Trip findTrip(Long tripId) {
     return tripRepository.findById(tripId)
         .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
@@ -168,6 +188,16 @@ public class ReservationServiceImpl implements ReservationService {
 
     if (reservedSeats >= trip.getOfferedSeats()) {
       trip.setStatus(TripStatus.COMPLET);
+      tripRepository.save(trip);
+    }
+  }
+
+  private void updateTripStatusAfterCancellation(Trip trip) {
+    int reservedSeats = reservationRepository.sumSeatsByTripAndStatus(
+        trip.getId(), ReservationStatus.CONFIRMEE);
+
+    if (trip.getStatus() == TripStatus.COMPLET && reservedSeats < trip.getOfferedSeats()) {
+      trip.setStatus(TripStatus.PUBLIE);
       tripRepository.save(trip);
     }
   }
