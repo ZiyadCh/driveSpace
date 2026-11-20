@@ -18,7 +18,9 @@ import ma.youcode.driveSpace.entities.Conductor;
 import ma.youcode.driveSpace.entities.StopPoint;
 import ma.youcode.driveSpace.entities.Trip;
 import ma.youcode.driveSpace.entities.Vehicle;
+import ma.youcode.driveSpace.enums.TripStatus;
 import ma.youcode.driveSpace.exception.BusinessRuleException;
+import ma.youcode.driveSpace.exception.ForbiddenActionException;
 import ma.youcode.driveSpace.exception.ResourceNotFoundException;
 import ma.youcode.driveSpace.mapper.StopPointMapper;
 import ma.youcode.driveSpace.mapper.TripMapper;
@@ -94,6 +96,23 @@ public class TripServiceImpl implements TripService {
       throw new BusinessRuleException("Cannot delete trip " + id + ": it has reservations");
     }
     tripRepository.delete(trip);
+  }
+
+  @Override
+  @Transactional
+  public void cancel(Long tripId, Long conductorId) {
+    Trip trip = findTrip(tripId);
+
+    if (!trip.getConductor().getId().equals(conductorId)) {
+      throw new ForbiddenActionException("You can only cancel your own trips.");
+    }
+
+    if (trip.getStatus() == TripStatus.ANNULE) {
+      throw new BusinessRuleException("This trip is already cancelled.");
+    }
+
+    trip.setStatus(TripStatus.ANNULE);
+    tripRepository.save(trip);
   }
 
   private Trip findTrip(Long id) {
