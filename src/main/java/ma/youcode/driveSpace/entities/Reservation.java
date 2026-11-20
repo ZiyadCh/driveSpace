@@ -59,6 +59,7 @@ public class Reservation {
   private LocalDateTime reservedAt = LocalDateTime.now();
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(nullable = false)
   private ReservationStatus status = ReservationStatus.CONFIRMEE;
 }

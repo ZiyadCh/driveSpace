@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
     return build(HttpStatus.CONFLICT, "Business rule violated", ex.getMessage(), request);
   }
 
+  @ExceptionHandler(ForbiddenActionException.class)
+  public ResponseEntity<ProblemDetail> handleForbidden(ForbiddenActionException ex, WebRequest request) {
+    log.warn("Forbidden action: {}", ex.getMessage());
+    return build(HttpStatus.FORBIDDEN, "Forbidden action", ex.getMessage(), request);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, WebRequest request) {
     Map<String, String> errors = new LinkedHashMap<>();
