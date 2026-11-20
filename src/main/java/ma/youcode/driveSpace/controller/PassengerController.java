@@ -17,7 +17,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ma.youcode.driveSpace.dto.PassengerRequest;
 import ma.youcode.driveSpace.dto.PassengerResponse;
+import ma.youcode.driveSpace.dto.ReservationResponse;
 import ma.youcode.driveSpace.service.PassengerService;
+import ma.youcode.driveSpace.service.ReservationService;
 
 @RestController
 @RequestMapping("/api/passengers")
@@ -25,6 +27,7 @@ import ma.youcode.driveSpace.service.PassengerService;
 public class PassengerController {
 
   private final PassengerService passengerService;
+  private final ReservationService reservationService;
 
   @GetMapping
   public List<PassengerResponse> findAll() {
@@ -45,6 +48,11 @@ public class PassengerController {
   @PutMapping("/{id}")
   public PassengerResponse update(@PathVariable Long id, @Valid @RequestBody PassengerRequest request) {
     return passengerService.update(id, request);
+  }
+
+  @GetMapping("/{id}/reservations")
+  public List<ReservationResponse> reservationHistory(@PathVariable Long id) {
+    return reservationService.findByPassenger(id);
   }
 
   @DeleteMapping("/{id}")
