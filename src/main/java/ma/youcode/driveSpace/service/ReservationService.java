@@ -17,5 +17,5 @@ public interface ReservationService {
 
   List<ReservationResponse> findByTripForConductor(Long tripId, Long conductorId);
 
-  void cancel(Long reservationId, Long passengerId, Long tripId);
+  void cancel(Long reservationId, Long passengerId);
 }
