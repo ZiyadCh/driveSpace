@@ -39,8 +39,11 @@ public class ReservationServiceImpl implements ReservationService {
   @Override
   @Transactional
   public ReservationResponse create(ReservationRequest request) {
-    Trip trip = findTrip(request.tripId());
-    Passenger passenger = findPassenger(request.passengerId());
+    Trip trip = tripRepository.findById(request.tripId())
+        .orElseThrow(() -> new ResourceNotFoundException("Trip " + request.tripId() + " not found"));
+
+    Passenger passenger = passengerRepository.findById(request.passengerId())
+        .orElseThrow(() -> new ResourceNotFoundException("Passenger " + request.passengerId() + " not found"));
 
     checkTripCanBeBooked(trip);
 
@@ -64,7 +67,10 @@ public class ReservationServiceImpl implements ReservationService {
 
   @Override
   public ReservationResponse findById(Long id) {
-    return mapper.toResponse(findReservation(id));
+    Reservation reservation = reservationRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Reservation " + id + " not found"));
+
+    return mapper.toResponse(reservation);
   }
 
   @Override
@@ -79,7 +85,8 @@ public class ReservationServiceImpl implements ReservationService {
 
   @Override
   public List<ReservationResponse> findByTripForConductor(Long tripId, Long conductorId) {
-    Trip trip = findTrip(tripId);
+    Trip trip = tripRepository.findById(tripId)
+        .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
 
     if (!trip.getConductor().getId().equals(conductorId)) {
       throw new ForbiddenActionException("You can only see reservations of your own trips.");
@@ -90,8 +97,16 @@ public class ReservationServiceImpl implements ReservationService {
 
   @Override
   @Transactional
-  public void cancel(Long reservationId, Long passengerId) {
-    Reservation reservation = findReservation(reservationId);
+  public void cancel(Long reservationId, Long passengerId, Long tripId) {
+    Reservation reservation = reservationRepository.findById(reservationId)
+        .orElseThrow(() -> new ResourceNotFoundException("Reservation " + reservationId + " not found"));
+
+    Trip trip = tripRepository.findById(tripId)
+        .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
+
+    if (LocalDateTime.now().isAfter(trip.getDepartureTime().minusHours(24))) {
+      throw new BusinessRuleException("You can't cancel before 24 hours before the trip");
+    }
 
     if (!reservation.getPassenger().getId().equals(passengerId)) {
       throw new ForbiddenActionException("You can only cancel your own reservations.");
@@ -104,23 +119,7 @@ public class ReservationServiceImpl implements ReservationService {
     reservation.setStatus(ReservationStatus.ANNULEE);
     reservationRepository.save(reservation);
 
-    updateTripStatusAfterCancellation(reservation.getTrip());
-  }
-
-  ///////////////////////////////
-  private Trip findTrip(Long tripId) {
-    return tripRepository.findById(tripId)
-        .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
-  }
-
-  private Passenger findPassenger(Long passengerId) {
-    return passengerRepository.findById(passengerId)
-        .orElseThrow(() -> new ResourceNotFoundException("Passenger " + passengerId + " not found"));
-  }
-
-  private Reservation findReservation(Long reservationId) {
-    return reservationRepository.findById(reservationId)
-        .orElseThrow(() -> new ResourceNotFoundException("Reservation " + reservationId + " not found"));
+    updateTripStatusAfterCancellation(trip);
   }
 
   private void checkTripCanBeBooked(Trip trip) {
