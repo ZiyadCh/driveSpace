@@ -58,6 +58,11 @@ public class ReservationServiceImpl implements ReservationService {
   }
 
   @Override
+  public List<ReservationResponse> findAll() {
+    return mapper.toResponseList(reservationRepository.findAll());
+  }
+
+  @Override
   public ReservationResponse findById(Long id) {
     return mapper.toResponse(findReservation(id));
   }

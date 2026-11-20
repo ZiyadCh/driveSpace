@@ -30,6 +30,11 @@ public class ReservationController {
     return ResponseEntity.created(URI.create("/api/reservations/" + created.id())).body(created);
   }
 
+  @GetMapping
+  public List<ReservationResponse> findAll() {
+    return reservationService.findAll();
+  }
+
   @GetMapping("/{id}")
   public ReservationResponse findById(@PathVariable Long id) {
     return reservationService.findById(id);
