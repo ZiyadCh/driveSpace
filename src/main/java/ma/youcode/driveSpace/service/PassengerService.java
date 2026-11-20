@@ -9,6 +9,8 @@ public interface PassengerService {
 
   List<PassengerResponse> findAll();
 
+  List<PassengerResponse> search(String name, String email);
+
   PassengerResponse findById(Long id);
 
   PassengerResponse create(PassengerRequest request);

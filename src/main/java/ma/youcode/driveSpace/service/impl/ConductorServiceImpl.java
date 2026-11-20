@@ -31,6 +31,14 @@ public class ConductorServiceImpl implements ConductorService {
   }
 
   @Override
+  public List<ConductorResponse> search(String name, String email) {
+    String nameFilter = name == null || name.isBlank() ? null : name.trim();
+    String emailFilter = email == null || email.isBlank() ? null : email.trim();
+
+    return mapper.toResponseList(conductorRepository.search(nameFilter, emailFilter));
+  }
+
+  @Override
   public ConductorResponse findById(Long id) {
     return mapper.toResponse(findConductor(id));
   }

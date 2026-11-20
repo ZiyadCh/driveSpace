@@ -29,6 +29,14 @@ public class PassengerServiceImpl implements PassengerService {
   }
 
   @Override
+  public List<PassengerResponse> search(String name, String email) {
+    String nameFilter = name == null || name.isBlank() ? null : name.trim();
+    String emailFilter = email == null || email.isBlank() ? null : email.trim();
+
+    return mapper.toResponseList(passengerRepository.search(nameFilter, emailFilter));
+  }
+
+  @Override
   public PassengerResponse findById(Long id) {
     return mapper.toResponse(findPassenger(id));
   }

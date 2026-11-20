@@ -9,6 +9,8 @@ public interface ReservationService {
 
   ReservationResponse create(ReservationRequest request);
 
+  List<ReservationResponse> findAll();
+
   ReservationResponse findById(Long id);
 
   List<ReservationResponse> findByPassenger(Long passengerId);

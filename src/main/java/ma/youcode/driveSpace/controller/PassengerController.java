@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -32,6 +33,12 @@ public class PassengerController {
   @GetMapping
   public List<PassengerResponse> findAll() {
     return passengerService.findAll();
+  }
+
+  @GetMapping("/search")
+  public List<PassengerResponse> search(@RequestParam(required = false) String name,
+      @RequestParam(required = false) String email) {
+    return passengerService.search(name, email);
   }
 
   @GetMapping("/{id}")
