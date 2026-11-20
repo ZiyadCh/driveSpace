@@ -9,6 +9,8 @@ public interface ConductorService {
 
   List<ConductorResponse> findAll();
 
+  List<ConductorResponse> search(String name, String email);
+
   ConductorResponse findById(Long id);
 
   ConductorResponse create(ConductorRequest request);
