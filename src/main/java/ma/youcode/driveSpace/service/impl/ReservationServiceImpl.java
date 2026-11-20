@@ -83,19 +83,6 @@ public class ReservationServiceImpl implements ReservationService {
     return mapper.toResponseList(reservationRepository.findByTripIdOrderByReservedAtDesc(tripId));
   }
 
-  @Override
-  @Transactional
-  public void cancel(Long reservationId, Long passengerId) {
-    Reservation reservation = findReservation(reservationId);
-    checkPassengerOwnsReservation(reservation, passengerId);
-    checkReservationCanBeCancelled(reservation);
-
-    reservation.setStatus(ReservationStatus.ANNULEE);
-    reservationRepository.save(reservation);
-
-    updateTripStatusAfterCancellation(reservation.getTrip());
-  }
-
   private Trip findTrip(Long tripId) {
     return tripRepository.findById(tripId)
         .orElseThrow(() -> new ResourceNotFoundException("Trip " + tripId + " not found"));
@@ -176,33 +163,6 @@ public class ReservationServiceImpl implements ReservationService {
 
     if (reservedSeats >= trip.getOfferedSeats()) {
       trip.setStatus(TripStatus.COMPLET);
-      tripRepository.save(trip);
-    }
-  }
-
-  private void checkPassengerOwnsReservation(Reservation reservation, Long passengerId) {
-    if (!reservation.getPassenger().getId().equals(passengerId)) {
-      throw new ForbiddenActionException("You can only cancel your own reservations.");
-    }
-  }
-
-  private void checkReservationCanBeCancelled(Reservation reservation) {
-    if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
-      throw new BusinessRuleException("This reservation is already cancelled.");
-    }
-
-    LocalDateTime cancellationDeadline = LocalDateTime.now().plusHours(24);
-    if (reservation.getTrip().getDepartureTime().isBefore(cancellationDeadline)) {
-      throw new BusinessRuleException("A reservation can only be cancelled at least 24 hours before departure.");
-    }
-  }
-
-  private void updateTripStatusAfterCancellation(Trip trip) {
-    int reservedSeats = reservationRepository.sumSeatsByTripAndStatus(
-        trip.getId(), ReservationStatus.CONFIRMEE);
-
-    if (trip.getStatus() == TripStatus.COMPLET && reservedSeats < trip.getOfferedSeats()) {
-      trip.setStatus(TripStatus.PUBLIE);
       tripRepository.save(trip);
     }
   }
