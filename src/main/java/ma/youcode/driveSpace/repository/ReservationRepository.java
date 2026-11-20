@@ -19,11 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   List<Reservation> findByTripIdOrderByReservedAtDesc(Long tripId);
 
-  @Query("""
-      select coalesce(sum(r.seats), 0)
-      from Reservation r
-      where r.trip.id = :tripId
-        and r.status = :status
-      """)
+  @Query("select coalesce(sum(r.seats), 0) from Reservation r where r.trip.id = :tripId and r.status = :status")
   int sumSeatsByTripAndStatus(@Param("tripId") Long tripId, @Param("status") ReservationStatus status);
 }
