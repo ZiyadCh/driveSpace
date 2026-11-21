@@ -4,15 +4,21 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +39,13 @@ public class GlobalExceptionHandler {
     log.warn("Conflict: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(problem(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request));
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<ProblemDetail> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
+    log.warn("Conflict: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(problem(HttpStatus.CONFLICT, "Conflict", "Already exists", request));
   }
 
   @ExceptionHandler(ForbiddenActionException.class)
@@ -58,6 +71,30 @@ public class GlobalExceptionHandler {
     log.warn("Missing header: {}", ex.getHeaderName());
     return ResponseEntity.badRequest()
         .body(problem(HttpStatus.BAD_REQUEST, "Bad request", "Missing header: " + ex.getHeaderName(), request));
+  }
+
+  @ExceptionHandler({ MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
+      HttpMessageNotReadableException.class, IllegalArgumentException.class })
+  public ResponseEntity<ProblemDetail> handleBadRequest(Exception ex, WebRequest request) {
+    log.warn("Bad request: {}", ex.getMessage());
+    return ResponseEntity.badRequest()
+        .body(problem(HttpStatus.BAD_REQUEST, "Bad request", "Bad request", request));
+  }
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ProblemDetail> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex,
+      WebRequest request) {
+    log.warn("Method not allowed: {}", ex.getMethod());
+    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+        .body(problem(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed", "Method not allowed", request));
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ProblemDetail> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex,
+      WebRequest request) {
+    log.warn("Unsupported media type: {}", ex.getContentType());
+    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+        .body(problem(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported media type", "Unsupported media type", request));
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
