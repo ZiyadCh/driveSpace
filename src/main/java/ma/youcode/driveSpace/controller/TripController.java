@@ -1,5 +1,6 @@
 package ma.youcode.driveSpace.controller;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ma.youcode.driveSpace.dto.TripRequest;
 import ma.youcode.driveSpace.dto.TripResponse;
+import ma.youcode.driveSpace.dto.TripSearchResponse;
 import ma.youcode.driveSpace.service.TripService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +50,18 @@ public class TripController {
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(required = false) LocalDateTime date) {
     return tripService.search(ville_depart, ville_arrive, date, PageRequest.of(page, size));
+  }
+
+  @GetMapping("/search/segment")
+  public Page<TripSearchResponse> searchByStops(
+      @RequestParam String fromCity,
+      @RequestParam String toCity,
+      @RequestParam(required = false) LocalDateTime dayStart,
+      @RequestParam(defaultValue = "1") long seats,
+      @RequestParam(required = false) BigDecimal maxPrice,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    return tripService.searchByStops(fromCity, toCity, dayStart, seats, maxPrice, PageRequest.of(page, size));
   }
 
   @PostMapping()

@@ -14,7 +14,7 @@ public record TripSearchResponse(
     String dropoffCity,
 
     BigDecimal segmentPrice,
-    int remainingSeats
+    long remainingSeats
 
 ) {
 }
