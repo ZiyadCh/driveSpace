@@ -1,5 +1,6 @@
 package ma.youcode.driveSpace.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,5 +31,24 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
       @Param("villeArrive") String villeArrive,
       @Param("from") LocalDateTime from,
       @Param("to") LocalDateTime to,
+      Pageable pageable);
+
+  @Query("""
+      select new ma.youcode.driveSpace.dto.TripSearchResponse(
+       t.id, t.departureCity, t.arrivalCity, t.departureTime
+       ,t.pickupCity,t.dropoffCity,
+       (dep.segmentPrice - arr.segmentPrice),
+        t.offeredSeats - coalesce((select sum(r.seats) from Reservation r
+            where r.trip = tri and r.status = 'CONFIRME'),0)
+             from Trip t
+             join StopPoint dep
+             join StopPoint arr
+             join Reservation r
+             """)
+  Page<Trip> search(@Param("from") String from, @Param("to") String to,
+      @Param("dayStart") LocalDateTime dayStart,
+      @Param("dayEnd") LocalDateTime dayEnd,
+      @Param("seats") long seats,
+      @Param("maxPrice") BigDecimal maxPrice,
       Pageable pageable);
 }
