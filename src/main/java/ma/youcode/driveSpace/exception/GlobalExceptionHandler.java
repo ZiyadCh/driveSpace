@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -47,6 +48,13 @@ public class GlobalExceptionHandler {
     ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed", "Invalid request body", request);
     problem.setProperty("errors", errors);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  public ResponseEntity<ProblemDetail> handleMissingHeader(MissingRequestHeaderException ex, WebRequest request) {
+    log.warn("Missing header: {}", ex.getHeaderName());
+    return build(HttpStatus.BAD_REQUEST, "Missing header",
+        "Required header '" + ex.getHeaderName() + "' is missing", request);
   }
 
   @ExceptionHandler(NoResourceFoundException.class)

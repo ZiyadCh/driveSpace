@@ -3,8 +3,6 @@ package ma.youcode.driveSpace.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record VehicleRequest(
@@ -17,7 +15,5 @@ public record VehicleRequest(
 
     @Size(max = 30, message = "Color must not exceed 30 characters") String color,
 
-    @Min(value = 1, message = "Capacity must be at least 1") @Max(value = 8, message = "Capacity must not exceed 8") int capacity,
-
-    @NotNull(message = "Conductor id is required") @Positive(message = "Conductor id must be positive") Long conductorId) {
+    @Min(value = 1, message = "Capacity must be at least 1") @Max(value = 8, message = "Capacity must not exceed 8") int capacity) {
 }
