@@ -1,5 +1,6 @@
 package ma.youcode.driveSpace.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import ma.youcode.driveSpace.dto.TripSearchResponse;
 import ma.youcode.driveSpace.entities.Trip;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
@@ -30,5 +32,35 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
       @Param("villeArrive") String villeArrive,
       @Param("from") LocalDateTime from,
       @Param("to") LocalDateTime to,
+      Pageable pageable);
+
+  @Query(value = """
+      select new ma.youcode.driveSpace.dto.TripSearchResponse(
+       t.id, t.departureCity, t.arrivalCity, t.departureTime
+       ,dep.city,arr.city,
+       (arr.priceFromDeparture - dep.priceFromDeparture),
+        t.offeredSeats - coalesce((select sum(r.seats) from Reservation r
+            where r.trip = t and r.status = 'CONFIRMEE'),0)
+        )
+             from Trip t
+             join t.stopPoints dep
+             join t.stopPoints arr
+             where dep.city = :fromCity
+             and arr.city = :toCity
+             and dep.stopOrder < arr.stopOrder
+             """, countQuery = """
+      select count(t)
+      from Trip t
+      join t.stopPoints dep
+      join t.stopPoints arr
+      where dep.city = :fromCity
+        and arr.city = :toCity
+        and dep.stopOrder < arr.stopOrder
+      """)
+  Page<TripSearchResponse> search(@Param("fromCity") String fromCity,
+      @Param("toCity") String toCity,
+      @Param("dayStart") LocalDateTime dayStart,
+      @Param("seats") long seats,
+      @Param("maxPrice") BigDecimal maxPrice,
       Pageable pageable);
 }

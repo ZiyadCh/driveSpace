@@ -1,5 +1,6 @@
 package ma.youcode.driveSpace.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import ma.youcode.driveSpace.dto.StopPointRequest;
 import ma.youcode.driveSpace.dto.TripRequest;
 import ma.youcode.driveSpace.dto.TripResponse;
+import ma.youcode.driveSpace.dto.TripSearchResponse;
 import ma.youcode.driveSpace.entities.Conductor;
 import ma.youcode.driveSpace.entities.StopPoint;
 import ma.youcode.driveSpace.entities.Trip;
@@ -86,6 +88,12 @@ public class TripServiceImpl implements TripService {
         villeArrive == null || villeArrive.isBlank() ? null : villeArrive,
         from, to, pageable)
         .map(mapper::toResponse);
+  }
+
+  @Override
+  public Page<TripSearchResponse> searchByStops(String fromCity, String toCity, LocalDateTime dayStart,
+      long seats, BigDecimal maxPrice, Pageable pageable) {
+    return tripRepository.search(fromCity, toCity, dayStart, seats, maxPrice, pageable);
   }
 
   @Override
