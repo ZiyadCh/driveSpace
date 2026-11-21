@@ -103,12 +103,12 @@ public class ReservationServiceImpl implements ReservationService {
 
     Trip trip = reservation.getTrip();
 
-    if (LocalDateTime.now().isAfter(trip.getDepartureTime().minusHours(24))) {
-      throw new BusinessRuleException("You can't cancel before 24 hours before the trip");
-    }
-
     if (!reservation.getPassenger().getId().equals(passengerId)) {
       throw new ForbiddenActionException("You can only cancel your own reservations.");
+    }
+
+    if (LocalDateTime.now().isAfter(trip.getDepartureTime().minusHours(24))) {
+      throw new BusinessRuleException("You can't cancel before 24 hours before the trip");
     }
 
     if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {

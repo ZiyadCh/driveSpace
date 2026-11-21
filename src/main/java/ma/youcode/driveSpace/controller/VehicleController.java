@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,29 +28,33 @@ public class VehicleController {
   private final VehicleService vehicleService;
 
   @GetMapping
-  public List<VehicleResponse> findAll() {
-    return vehicleService.findAll();
+  public List<VehicleResponse> findAll(@RequestHeader("X-Conductor-Id") Long conductorId) {
+    return vehicleService.findAll(conductorId);
   }
 
   @GetMapping("/{id}")
-  public VehicleResponse findById(@PathVariable Long id) {
-    return vehicleService.findById(id);
+  public VehicleResponse findById(@PathVariable Long id,
+      @RequestHeader("X-Conductor-Id") Long conductorId) {
+    return vehicleService.findById(id, conductorId);
   }
 
   @PostMapping
-  public ResponseEntity<VehicleResponse> create(@Valid @RequestBody VehicleRequest request) {
-    VehicleResponse created = vehicleService.create(request);
+  public ResponseEntity<VehicleResponse> create(@Valid @RequestBody VehicleRequest request,
+      @RequestHeader("X-Conductor-Id") Long conductorId) {
+    VehicleResponse created = vehicleService.create(request, conductorId);
     return ResponseEntity.created(URI.create("/api/vehicles/" + created.id())).body(created);
   }
 
   @PutMapping("/{id}")
-  public VehicleResponse update(@PathVariable Long id, @Valid @RequestBody VehicleRequest request) {
-    return vehicleService.update(id, request);
+  public VehicleResponse update(@PathVariable Long id, @Valid @RequestBody VehicleRequest request,
+      @RequestHeader("X-Conductor-Id") Long conductorId) {
+    return vehicleService.update(id, request, conductorId);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable Long id) {
-    vehicleService.delete(id);
+  public ResponseEntity<Void> delete(@PathVariable Long id,
+      @RequestHeader("X-Conductor-Id") Long conductorId) {
+    vehicleService.delete(id, conductorId);
     return ResponseEntity.noContent().build();
   }
 }

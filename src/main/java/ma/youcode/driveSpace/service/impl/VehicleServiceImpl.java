@@ -11,6 +11,7 @@ import ma.youcode.driveSpace.dto.VehicleResponse;
 import ma.youcode.driveSpace.entities.Conductor;
 import ma.youcode.driveSpace.entities.Vehicle;
 import ma.youcode.driveSpace.exception.BusinessRuleException;
+import ma.youcode.driveSpace.exception.ForbiddenActionException;
 import ma.youcode.driveSpace.exception.ResourceNotFoundException;
 import ma.youcode.driveSpace.mapper.VehicleMapper;
 import ma.youcode.driveSpace.repository.ConductorRepository;
@@ -27,49 +28,57 @@ public class VehicleServiceImpl implements VehicleService {
   private final VehicleMapper mapper;
 
   @Override
-  public List<VehicleResponse> findAll() {
-    return mapper.toResponseList(vehicleRepository.findAll());
+  public List<VehicleResponse> findAll(Long conductorId) {
+    return mapper.toResponseList(vehicleRepository.findByConductorId(conductorId));
   }
 
   @Override
-  public VehicleResponse findById(Long id) {
-    return mapper.toResponse(findVehicle(id));
+  public VehicleResponse findById(Long id, Long conductorId) {
+    return mapper.toResponse(findOwnedVehicle(id, conductorId));
   }
 
   @Override
   @Transactional
-  public VehicleResponse create(VehicleRequest request) {
+  public VehicleResponse create(VehicleRequest request, Long conductorId) {
     if (vehicleRepository.existsByPlateNumber(request.plateNumber())) {
       throw new BusinessRuleException("A vehicle with plate number " + request.plateNumber() + " already exists");
     }
 
     Vehicle vehicle = mapper.toEntity(request);
-    vehicle.setConductor(findConductor(request.conductorId()));
+    vehicle.setConductor(findConductor(conductorId));
     return mapper.toResponse(vehicleRepository.save(vehicle));
   }
 
   @Override
   @Transactional
-  public VehicleResponse update(Long id, VehicleRequest request) {
-    Vehicle vehicle = findVehicle(id);
+  public VehicleResponse update(Long id, VehicleRequest request, Long conductorId) {
+    Vehicle vehicle = findOwnedVehicle(id, conductorId);
 
     if (vehicleRepository.existsByPlateNumberAndIdNot(request.plateNumber(), id)) {
       throw new BusinessRuleException("A vehicle with plate number " + request.plateNumber() + " already exists");
     }
 
     mapper.update(request, vehicle);
-    vehicle.setConductor(findConductor(request.conductorId()));
+    vehicle.setConductor(findConductor(conductorId));
     return mapper.toResponse(vehicleRepository.save(vehicle));
   }
 
   @Override
   @Transactional
-  public void delete(Long id) {
-    Vehicle vehicle = findVehicle(id);
+  public void delete(Long id, Long conductorId) {
+    Vehicle vehicle = findOwnedVehicle(id, conductorId);
     if (vehicleRepository.isUsedInTrips(id)) {
       throw new BusinessRuleException("Cannot delete vehicle " + id + ": it is used by a trip");
     }
     vehicleRepository.delete(vehicle);
+  }
+
+  private Vehicle findOwnedVehicle(Long id, Long conductorId) {
+    Vehicle vehicle = findVehicle(id);
+    if (!vehicle.getConductor().getId().equals(conductorId)) {
+      throw new ForbiddenActionException("You can only manage your own vehicles.");
+    }
+    return vehicle;
   }
 
   private Vehicle findVehicle(Long id) {
