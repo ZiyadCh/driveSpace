@@ -24,19 +24,22 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleNotFound(ResourceNotFoundException ex, WebRequest request) {
     log.warn("Not found: {}", ex.getMessage());
-    return build(HttpStatus.NOT_FOUND, "Resource not found", ex.getMessage(), request);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(problem(HttpStatus.NOT_FOUND, "Not found", ex.getMessage(), request));
   }
 
   @ExceptionHandler(BusinessRuleException.class)
   public ResponseEntity<ProblemDetail> handleBusinessRule(BusinessRuleException ex, WebRequest request) {
-    log.warn("Business rule refused: {}", ex.getMessage());
-    return build(HttpStatus.CONFLICT, "Business rule violated", ex.getMessage(), request);
+    log.warn("Conflict: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(problem(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request));
   }
 
   @ExceptionHandler(ForbiddenActionException.class)
   public ResponseEntity<ProblemDetail> handleForbidden(ForbiddenActionException ex, WebRequest request) {
-    log.warn("Forbidden action: {}", ex.getMessage());
-    return build(HttpStatus.FORBIDDEN, "Forbidden action", ex.getMessage(), request);
+    log.warn("Forbidden: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(problem(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage(), request));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,34 +48,30 @@ public class GlobalExceptionHandler {
     ex.getBindingResult().getFieldErrors()
         .forEach(e -> errors.putIfAbsent(e.getField(), e.getDefaultMessage()));
     log.warn("Validation failed: {}", errors);
-    ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed", "Invalid request body", request);
-    problem.setProperty("errors", errors);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    ProblemDetail detail = problem(HttpStatus.BAD_REQUEST, "Bad request", "Invalid request", request);
+    detail.setProperty("errors", errors);
+    return ResponseEntity.badRequest().body(detail);
   }
 
   @ExceptionHandler(MissingRequestHeaderException.class)
   public ResponseEntity<ProblemDetail> handleMissingHeader(MissingRequestHeaderException ex, WebRequest request) {
     log.warn("Missing header: {}", ex.getHeaderName());
-    return build(HttpStatus.BAD_REQUEST, "Missing header",
-        "Required header '" + ex.getHeaderName() + "' is missing", request);
+    return ResponseEntity.badRequest()
+        .body(problem(HttpStatus.BAD_REQUEST, "Bad request", "Missing header: " + ex.getHeaderName(), request));
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<ProblemDetail> handleNoRoute(NoResourceFoundException ex, WebRequest request) {
     log.warn("No endpoint: {}", ex.getResourcePath());
-    return build(HttpStatus.NOT_FOUND, "Endpoint not found",
-        "No endpoint exists at /" + ex.getResourcePath(), request);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(problem(HttpStatus.NOT_FOUND, "Not found", "No endpoint at /" + ex.getResourcePath(), request));
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleUnexpected(Exception ex, WebRequest request) {
     log.error("Unexpected error", ex);
-    return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
-        "An unexpected error occurred", request);
-  }
-
-  private ResponseEntity<ProblemDetail> build(HttpStatus status, String title, String detail, WebRequest request) {
-    return ResponseEntity.status(status).body(problem(status, title, detail, request));
+    return ResponseEntity.internalServerError()
+        .body(problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "Unexpected error", request));
   }
 
   private ProblemDetail problem(HttpStatus status, String title, String detail, WebRequest request) {
